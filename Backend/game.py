@@ -29,28 +29,41 @@ def generate_scenario(genre, num_players):
     player_roles = random.sample(roles[genre], num_players)
     return situation, player_roles
 
-# Generate the background story with player responsibilities and user perspective
+# Generate the background story with player responsibilities in JSON format
+
+
 def generate_background_story(genre, situation, player_roles, player_names):
     prompt = (
-        f"Dungeon Master: The {genre.lower()} setting is fraught with danger as {situation} unfolds. "
-        f"Your party must quickly react to the situation at hand.\n\n"
+        f"As the Dungeon Master in a {genre.lower()} setting, a critical situation unfolds: {situation}. "
+        f"The party must act swiftly to navigate through the dangers.\n\n"
+        "You will generate a JSON object with the following structure:\n\n"
+        "{\n"
+        "  \"prefix_of_general_narration\": \"[Introduction to the situation that all players see]\",\n"
+        "  \"{Role1}\": \"[Actionable prompts, responsibilities, and challenges for Player1 in Role1]\",\n"
+        "  \"{Role2}\": \"[Actionable prompts, responsibilities, and challenges for Player2 in Role2]\",\n"
+        "  \"...\": \"[Additional roles as needed]\",\n"
+        "  \"suffix_of_general_narration\": \"[Closing narration that all players see]\"\n"
+        "}\n\n"
     )
 
-    for i, (role, name) in enumerate(zip(player_roles, player_names)):
+    prompt += "Prefix of the general narration: Describe the scene, setting the tone and the urgency of the situation, which all players will see.\n\n"
+
+    for i, (player_name, role) in enumerate(zip(player_roles, player_names)):
         prompt += (
-            f"**{name} ({role}):** You have specific responsibilities in this dire situation.\n\n"
-            f"* **Responsibility 1:** Describe an action that fits your role in the context of the {situation}.\n"
-            f"* **Responsibility 2:** Consider the well-being of the group while carrying out your tasks.\n"
-            f"* **Responsibility 3:** Evaluate any risks and potential rewards in your actions.\n\n"
+            f"{role}: The player is {player_name}, and their role is {role}. Provide specific actionable prompts that match their responsibilities in this situation. "
+            f"Include at least three responsibilities or actions they must consider:\n"
+            f"* **Responsibility 1:** Describe an action that fits the role in the context of the {situation}.\n"
+            f"* **Responsibility 2:** Consider the well-being of the group while carrying out their tasks.\n"
+            f"* **Responsibility 3:** Evaluate any risks and potential rewards in their actions.\n\n"
         )
 
-    prompt += (
-        "The situation intensifies, and every decision could mean the difference between survival and doom. "
-        "What will you do?"
-    )
-    
+    prompt += "Suffix of the general narration: Conclude the setup, emphasizing the urgency and the stakes. This will also be visible to all players.\n\n"
+
+    prompt += "Generate this structured JSON output with the narrations and roles' responsibilities filled in accordingly."
+
     response = model.generate_content(prompt)
     return response.text
+
 
 # Generate the final story and song based on player actions
 def generate_final_story_and_song(genre, situation, player_roles, player_names, player_actions):
