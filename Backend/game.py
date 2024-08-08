@@ -30,8 +30,6 @@ def generate_scenario(genre, num_players):
     return situation, player_roles
 
 # Generate the background story with player responsibilities in JSON format
-
-
 def generate_background_story(genre, situation, player_roles, player_names):
     prompt = (
         f"As the Dungeon Master in a {genre.lower()} setting, a critical situation unfolds: {situation}. "
@@ -48,7 +46,7 @@ def generate_background_story(genre, situation, player_roles, player_names):
 
     prompt += "Prefix of the general narration: Describe the scene, setting the tone and the urgency of the situation, which all players will see.\n\n"
 
-    for i, (player_name, role) in enumerate(zip(player_roles, player_names)):
+    for i, (player_name, role) in enumerate(zip(player_names, player_roles)):
         prompt += (
             f"{role}: The player is {player_name}, and their role is {role}. Provide specific actionable prompts that match their responsibilities in this situation. "
             f"Include at least three responsibilities or actions they must consider:\n"
@@ -66,12 +64,12 @@ def generate_background_story(genre, situation, player_roles, player_names):
 
 
 # Generate the final story and song based on player actions
-def generate_final_story_and_song(genre, situation, player_roles, player_names, player_actions):
-    prompt = f"In a {genre} adventure, your group of friends faced a {situation}. "
+def generate_final_story_and_song(genre, situation, player_roles, player_names, player_actions, prefix, suffix):
+    prompt = f"In a {genre} adventure, your group of friends faced a {situation}. {prefix} "
     for name, role, action in zip(player_names, player_roles, player_actions):
         prompt += f"{name} ({role}) decided to {action}. "
     prompt += (
-        "Write an engaging story about their adventure, including outcomes such as who survived, who got injured, and if they gained anything. "
+        f"{suffix} Write an engaging story about their adventure, including outcomes such as who survived, who got injured, and if they gained anything. "
         "Additionally, create a song inspired by the story in an appropriate style. Respond in JSON format with fields 'story', 'song', and 'song_style'."
     )
     
@@ -87,6 +85,36 @@ background_story = generate_background_story(genre, situation, player_roles, pla
 
 print("Dungeon Master:", background_story)
 
+# Example of extracting prefix and suffix from the generated background story (assuming background_story is in JSON format)
+# This part depends on how the JSON is structured when received from the model
+# For example purposes, we'll assume it's a dictionary:
+import json
+prefix_narration = ""
+suffix_narration = ""
+
+
+try:
+    json_start = background_story.find('{')
+    json_end = background_story.rfind('}') + 1
+    json_string = background_story[json_start:json_end].strip()
+    
+    print(json_string)
+    # Load the JSON into a dictionary
+    background_story_dict = json.loads(json_string)
+    
+    # Example usage
+    prefix_narration = background_story_dict.get("prefix_of_general_narration", "")
+    suffix_narration = background_story_dict.get("suffix_of_general_narration", "")
+    
+    print("Prefix Narration:", prefix_narration)
+    print("Suffix Narration:", suffix_narration)
+    
+except json.JSONDecodeError as e:
+    print("Failed to decode JSON:", e)
+except Exception as e:
+    print("An error occurred:", e)
+    
+    
 # Collect player actions
 player_actions = []
 for name, role in zip(player_names, player_roles):
@@ -96,5 +124,5 @@ for name, role in zip(player_names, player_roles):
 print("Player Actions:", player_actions)
 
 # Generate final output
-final_output = generate_final_story_and_song(genre, situation, player_roles, player_names, player_actions)
+final_output = generate_final_story_and_song(genre, situation, player_roles, player_names, player_actions, prefix_narration, suffix_narration)
 print("Final Output:", final_output)
