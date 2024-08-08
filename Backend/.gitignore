@@ -140,3 +140,4 @@ cython_debug/
 # API Key (optional if you use a separate file for the key)
 api_key.txt
 
+myenv
