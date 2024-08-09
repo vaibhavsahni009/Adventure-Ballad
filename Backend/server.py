@@ -83,13 +83,18 @@ def home():
 def start_game(data):
     """Start the game if conditions are met."""
     room, name, error = validate_session()
-    if error:
-        send({"name": "Server", "message": error}, room=request.sid)
-        return
 
+    if error:
+        send({"name": "Server", "type": "error", "message": error}, room=request.sid)
+        return
+    print(123)
     if rooms[room]["admin"] != name:
         send(
-            {"name": "Server", "message": "Only the admin can start the game."},
+            {
+                "name": "Server",
+                "type": "error",
+                "message": "Only the admin can start the game.",
+            },
             room=request.sid,
         )
         return
@@ -98,6 +103,7 @@ def start_game(data):
         send(
             {
                 "name": "Server",
+                "type": "error",
                 "message": f"At least {MIN_USERS} users are required to start the game.",
             },
             room=request.sid,
@@ -226,7 +232,7 @@ def check_user_activity():
 
 
 if __name__ == "__main__":
-    thread = threading.Thread(target=check_user_activity)
-    thread.daemon = True
-    thread.start()
+    # thread = threading.Thread(target=check_user_activity)
+    # thread.daemon = True
+    # thread.start()
     socketio.run(app, debug=True)
