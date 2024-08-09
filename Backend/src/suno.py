@@ -1,0 +1,2 @@
+def suno(song):
+    return
