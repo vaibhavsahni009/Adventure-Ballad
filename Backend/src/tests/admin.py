@@ -1,108 +1,73 @@
-import socketio
 import requests
-import json
-import asyncio
 
-# Constants
-SERVER_URL = "http://localhost:5000"
+BASE_URL = "http://localhost:5000/"
 
 
-# Helper functions
+def join_room(name, code):
+    url = BASE_URL
+    data = {"name": name, "code": code, "join": True}
+    response = requests.post(url, json=data)
+    return response.json()
+
+
 def create_room(name):
-    response = requests.post(SERVER_URL, json={"name": name, "create": True})
-    if response.status_code == 200:
-        data = response.json()
-        return data["room"]
-    else:
-        print(f"Error creating room: {response.json()}")
-        return None
+    url = BASE_URL
+    data = {"name": name, "create": True}
+    response = requests.post(url, json=data)
+    return response.json()
 
 
-def join_room(name, room_code):
-    response = requests.post(
-        SERVER_URL, json={"name": name, "join": True, "code": room_code}
-    )
-    if response.status_code == 200:
-        data = response.json()
-        return data["room"]
-    else:
-        print(f"Error joining room: {response.json()}")
-        return None
+def start_game(name, code, genre="random"):
+    url = BASE_URL + "start_game"
+    data = {"name": name, "code": code, "genre": genre}
+    response = requests.post(url, json=data)
+    # return response.json()
 
 
-def get_room_info():
-    response = requests.get(f"{SERVER_URL}/room")
-    if response.status_code == 200:
-        return response.json()
-    else:
-        print(f"Error getting room info: {response.json()}")
-        return None
+def fetch_scenario(name, code):
+    url = BASE_URL + "fetch_scenario"
+    data = {"name": name, "code": code}
+    response = requests.get(url, json=data)
+    return response.json()
 
 
-# Initialize Socket.IO client
-sio = socketio.Client()
+def fetch_room_details(code):
+    url = BASE_URL + "fetch_room_details"
+    data = {"code": code}
+    response = requests.get(url, json=data)
+    return response.json()
 
 
-@sio.event
-def connect():
-    print("Connected to server")
+def submit_action(name, code, action):
+    url = BASE_URL + "submit_action"
+    data = {"name": name, "code": code, "action": action}
+    response = requests.post(url, json=data)
+    return response.json()
 
 
-@sio.event
-def connect_error(data):
-    print(f"Connection failed: {data}")
-
-
-@sio.event
-def disconnect():
-    print("Disconnected from server")
-
-
-@sio.event
-def server_message(data):
-    print(f"Received message from server: {data}")
-
-
-@sio.event
-def error_message(data):
-    """Handle error messages from the server."""
-    if data.get("type") == "error":
-        print(f"Error from server: {data['message']}")
-
-
-async def main():
-    # Connect to the server
-    sio.connect("http://localhost:5000")
-
+# Example usage
+if __name__ == "__main__":
     # Create a room
-    name = "User1"
-    room_code = create_room(name)
-    if room_code is None:
-        return
+    create_response = create_room("admin_user")
+    print("Create Room Response:", create_response)
 
-    print(f"Room created with code: {room_code}")
-
-    # Optionally, join the room with another user
-    # room_code = join_room("User2", room_code)
-    # if room_code is None:
-    #     return
-    # print(f"Joined room with code: {room_code}")
+    # Join the created room
+    room_code = create_response["room"]
+    join_response = join_room("user1", room_code)
+    print("Join Room Response:", join_response)
 
     # Start the game
-    start_game_message = {"message": "Starting the game!", "genre": "adventure"}
-    sio.emit("start_game", start_game_message)
+    start_game_response = start_game("admin_user", room_code, genre="Pirate")
+    print("Start Game Response:")
+
+    # Fetch the scenario for a user
+    scenario_response = fetch_scenario("user1", room_code)
+    print("Fetch Scenario Response:", scenario_response)
+
+    # Fetch the room details
+    room_details_response = fetch_room_details(room_code)
+    print("Fetch Room Details Response:", room_details_response)
 
     # Submit an action
-    submit_action_message = {"action": "Exploring the cave", "genre": "adventure"}
-    sio.emit("submit_action", submit_action_message)
-
-    # Give time for the server to respond
-    await asyncio.sleep(5)
-
-    # Disconnect from the server
-    sio.disconnect()
-
-
-# Run the script
-if __name__ == "__main__":
-    asyncio.run(main())
+    submit_action_response = submit_action("user1", room_code, "User action text")
+    print("Submit Action Response:", submit_action_response)

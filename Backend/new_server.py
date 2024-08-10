@@ -8,6 +8,7 @@ import time
 from src.game import Game_Model
 from src.suno import suno
 import logging
+import copy
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "hjhjsdahhds"
@@ -125,6 +126,10 @@ def start_game():
     background_stories = game_model.generate_background_story(
         genre, situation, player_roles, player_names
     )
+    print("jkahskdjhksdahkhdkahsskhdkhsh")
+    print(player_roles)
+    print(background_stories)
+    print(situation)
     # Todo get roles and situations in right format
 
     # Store game data in the room
@@ -158,10 +163,12 @@ def fetch_scenario():
 
 
 @app.route("/fetch_room_details", methods=["GET"])
-def fetch_scenario():
+def fetch_room_details():
     data = request.json
     room = data.get("code")
-    return jsonify({"room": rooms[room]})
+    a = copy.deepcopy(rooms[room])
+    del a["game_model"]
+    return jsonify({"room": a})
 
 
 @app.route("/submit_action", methods=["POST"])
