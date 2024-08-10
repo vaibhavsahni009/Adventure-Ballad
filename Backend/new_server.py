@@ -59,7 +59,7 @@ def home():
                     "last_active": time.time(),
                     "role": None,
                     "response": None,
-                    "story": None,
+                    "action_prompts": None,
                 },
             },
             "messages": [],
@@ -126,7 +126,18 @@ def start_game():
     background_stories = game_model.generate_background_story(
         genre, situation, player_roles, player_names
     )
-    print("jkahskdjhksdahkhdkahsskhdkhsh")
+    background_stories_json = game_model.get_json_from_text(background_stories)
+    # for i in range(0,len(player_roles)):
+    for i, player in enumerate(list(rooms[room]["members"].values())):
+        player["role"] = player_roles[i]
+        player["action_prompts"] = background_stories_json.get(player["role"])
+    rooms[room]["background_story_raw"] = background_stories
+    rooms[room]["situation"] = situation
+    rooms[room]["prefix"], rooms[room]["suffix"] = game_model.get_suffix_prefix(
+        background_stories
+    )
+    rooms[room]["num_players"] = num_players
+
     print(player_roles)
     print(background_stories)
     print(situation)
@@ -159,16 +170,27 @@ def fetch_scenario():
     data = request.json
     room = data.get("code")
     name = data.get("name")
-    return jsonify({"room": room, "user_name": name, "data": rooms[room].get(name)})
+    response = {
+        "room": room,
+        "user_name": name,
+        "data": rooms[room]["members"].get(name),
+    }
+    print("jhgdasjfgjhgasdjgj")
+    print(rooms)
+    print(response)
+    return jsonify(response), 200
 
 
 @app.route("/fetch_room_details", methods=["GET"])
 def fetch_room_details():
     data = request.json
     room = data.get("code")
-    a = copy.deepcopy(rooms[room])
-    del a["game_model"]
-    return jsonify({"room": a})
+    new_dict = {}
+    for key, value in rooms[room].items():
+        if key != "game_model":
+            new_dict[key] = value
+
+    return jsonify({"room": new_dict}), 200
 
 
 @app.route("/submit_action", methods=["POST"])

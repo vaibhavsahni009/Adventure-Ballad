@@ -103,18 +103,24 @@ class Game_Model:
         response = self.model.generate_content(prompt)
         return response.text
 
+    def get_json_from_text(self, background_story):
+        json_start = background_story.find("{")
+        json_end = background_story.rfind("}") + 1
+        json_string = background_story[json_start:json_end].strip()
+
+        # print(json_string)
+        # Load the JSON into a dictionary
+        background_story_dict = json.loads(json_string)
+        return background_story_dict
+
     def get_suffix_prefix(self, background_story):
         prefix_narration = ""
         suffix_narration = ""
 
         try:
-            json_start = background_story.find("{")
-            json_end = background_story.rfind("}") + 1
-            json_string = background_story[json_start:json_end].strip()
-
-            print(json_string)
-            # Load the JSON into a dictionary
-            background_story_dict = json.loads(json_string)
+            background_story_dict = self.get_json_from_text(
+                background_story=background_story
+            )
 
             # Example usage
             prefix_narration = background_story_dict.get(
