@@ -3,12 +3,14 @@ from flask_socketio import join_room, leave_room, send, SocketIO
 from flask_cors import CORS
 import random
 from string import ascii_uppercase
-import threading
+
+# import threading
 import time
 from src.game import Game_Model
 from src.suno import suno
-import logging
-import copy
+
+# import logging
+import json
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "hjhjsdahhds"
@@ -58,7 +60,7 @@ def home():
                     "joined_at": time.time(),
                     "last_active": time.time(),
                     "role": None,
-                    "response": None,
+                    "player_action": None,
                     "action_prompts": None,
                 },
             },
@@ -66,6 +68,7 @@ def home():
             "admin": name,
             "started": False,
             "game_model": Game_Model(),
+            "player_reponses": 0,
         }
     else:
         room = code
@@ -84,12 +87,9 @@ def home():
 @app.route("/start_game", methods=["POST"])
 def start_game():
     """Start the game if conditions are met."""
-    # room, name, error = validate_session()
     data = request.json
     room = data.get("code")
     name = data.get("name")
-    # if error:
-    #     return jsonify({"name": "Server", "type": "error", "message": error}), 400
 
     if rooms[room]["admin"] != name:
         return (
@@ -127,41 +127,27 @@ def start_game():
         genre, situation, player_roles, player_names
     )
     background_stories_json = game_model.get_json_from_text(background_stories)
-    # for i in range(0,len(player_roles)):
+
+    keys = list(background_stories_json.keys())
+    new_dict = {}
+    for key in keys:
+        new_key = key.split(" ")[0].split("_")[0]
+        print(new_key)
+        new_dict[new_key] = background_stories_json[key]
     for i, player in enumerate(list(rooms[room]["members"].values())):
         player["role"] = player_roles[i]
-        player["action_prompts"] = background_stories_json.get(player["role"])
+        player["action_prompts"] = new_dict.get(player["role"])
+
+    
     rooms[room]["background_story_raw"] = background_stories
+    rooms[room]["background_story_raw"] = new_dict
     rooms[room]["situation"] = situation
     rooms[room]["prefix"], rooms[room]["suffix"] = game_model.get_suffix_prefix(
         background_stories
     )
     rooms[room]["num_players"] = num_players
-
-    print(player_roles)
-    print(background_stories)
-    print(situation)
-    # Todo get roles and situations in right format
-
-    # Store game data in the room
-    # rooms[room].update(
-    #     {
-    #         "situation": situation,
-    #         "player_roles": player_roles,
-    #         "background_stories": background_stories,
-    #         "num_players": num_players,
-    #         "player_names": player_names,
-    #     }
-    # )
-
-    # Create a response dictionary for each user
+    print(f"Num players {num_players} {rooms[room]["num_players"]}")
     response_data = {}
-    # for user in player_names:
-    #     user_story = background_stories[user]
-    #     # Send the scenario to the user via WebSocket or add it to the response
-    #     # send({"name": "Server", "scenario": user_story}, to=user)
-    #     response_data[user] = {"scenario": user_story}
-
     return jsonify(response_data), 200
 
 
@@ -175,9 +161,6 @@ def fetch_scenario():
         "user_name": name,
         "data": rooms[room]["members"].get(name),
     }
-    print("jhgdasjfgjhgasdjgj")
-    print(rooms)
-    print(response)
     return jsonify(response), 200
 
 
@@ -200,29 +183,37 @@ def submit_action():
     room = data.get("code")
     name = data.get("name")
     action = data.get("action", "No action")
-
-    rooms[room].setdefault("player_actions", {})[name] = action
-
+    rooms[room]["player_reponses"] += 1
+    rooms[room]["members"][name]["player_action"] = action
     print(f"{name} submitted action: {action}")
 
     # Check if all players have submitted their actions
-    if len(rooms[room]["player_actions"]) == rooms[room]["num_players"]:
+    if rooms[room]["player_reponses"] == rooms[room]["num_players"]:
         game_model = rooms[room]["game_model"]
         genre = request.json.get("genre", "default")
 
-        # Generate the prefix and suffix for the story
-        prefix, suffix = game_model.get_suffix_prefix(rooms[room]["background_stories"])
-        # Todo send all actions and roles and names and
-        # Generate the final story and song
-        final_story, song = game_model.generate_final_story_and_song(
+        player_names = list(rooms[room]["members"].keys())
+        player_roles = []
+        player_actions = []
+
+        for player in player_names:
+            player_roles.append(rooms[room]["members"][player].get("role"))
+            player_actions.append(rooms[room]["members"][player].get("player_action"))
+
+        response = game_model.generate_final_story_and_song(
             genre=genre,
             situation=rooms[room]["situation"],
-            player_roles=rooms[room]["player_roles"],
-            player_names=rooms[room]["player_names"],
-            player_actions=rooms[room]["player_actions"],
+            player_roles=player_roles,
+            player_names=player_names,
+            player_actions=player_actions,
             prefix=rooms[room]["prefix"],
             suffix=rooms[room]["suffix"],
         )
+        print()
+        print(response)
+        response_dict = game_model.get_json_from_text(response)
+        final_story = response_dict.get("story")
+        song = response_dict.get("song")
         rooms[room]["story"] = final_story
         rooms[room]["song"] = song
         # Call a function to handle the song (e.g., play or save)
@@ -236,11 +227,21 @@ def submit_action():
             200,
         )
 
+    else:
+        print("Not yet")
     # If not all players have submitted their actions
     return (
         jsonify({"status": "pending", "message": f"Action from {name} recorded."}),
         200,
     )
+
+
+@app.route("/fetch_final_story", methods=["GET"])
+def fetch_final_story():
+    data = request.json
+    room = data.get("code")
+    name = data.get("name")
+    return jsonify({"final_story": rooms[room].get("story")}), 200
 
 
 if __name__ == "__main__":

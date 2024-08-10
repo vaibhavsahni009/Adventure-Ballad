@@ -108,7 +108,7 @@ class Game_Model:
         json_end = background_story.rfind("}") + 1
         json_string = background_story[json_start:json_end].strip()
 
-        # print(json_string)
+        print(json_string)
         # Load the JSON into a dictionary
         background_story_dict = json.loads(json_string)
         return background_story_dict

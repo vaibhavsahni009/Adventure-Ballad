@@ -69,5 +69,9 @@ if __name__ == "__main__":
     print("Fetch Room Details Response:", room_details_response)
 
     # Submit an action
-    submit_action_response = submit_action("user1", room_code, "User action text")
+    abc = ""
+    submit_action_response = submit_action("user1", room_code, action=abc)
+    print("Submit Action Response:", submit_action_response)
+
+    submit_action_response = submit_action("admin_user", room_code, action=abc)
     print("Submit Action Response:", submit_action_response)
