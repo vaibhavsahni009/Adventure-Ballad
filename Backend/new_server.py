@@ -212,7 +212,7 @@ def submit_action():
 
         # Generate the prefix and suffix for the story
         prefix, suffix = game_model.get_suffix_prefix(rooms[room]["background_stories"])
-
+        # Todo send all actions and roles and names and
         # Generate the final story and song
         final_story, song = game_model.generate_final_story_and_song(
             genre=genre,
@@ -220,8 +220,8 @@ def submit_action():
             player_roles=rooms[room]["player_roles"],
             player_names=rooms[room]["player_names"],
             player_actions=rooms[room]["player_actions"],
-            prefix=prefix,
-            suffix=suffix,
+            prefix=rooms[room]["prefix"],
+            suffix=rooms[room]["suffix"],
         )
         rooms[room]["story"] = final_story
         rooms[room]["song"] = song
