@@ -11,11 +11,11 @@ from src.suno import suno
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "hjhjsdahhds"
 CORS(app)
-socketio = SocketIO(app, cors_allowed_origins="*")
+# socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app, cors_allowed_origins="*", manage_session=True)
 
 rooms = {}
 MIN_USERS = 2
-# Assume Game_model is defined elsewhere and imported
 
 
 def generate_unique_code(length):
@@ -28,8 +28,10 @@ def generate_unique_code(length):
 
 def validate_session():
     """Validate the user's session."""
+    print(session)
     room = session.get("room")
     name = session.get("name")
+
     if not room or not name or room not in rooms or name not in rooms[room]["members"]:
         return None, None, "Invalid session."
     return room, name, None
@@ -74,20 +76,22 @@ def home():
         if room not in rooms:
             return jsonify({"error": "Room does not exist."}), 400
 
-    session.update({"room": room, "name": name})
+    # Store user data in session
+    session["room"] = room
+    session["name"] = name
     rooms[room]["members"][name] = time.time()
-    return jsonify({"room": room})
+    return jsonify({"room": room, "user_name": name})
 
 
 @socketio.on("start_game")
 def start_game(data):
     """Start the game if conditions are met."""
     room, name, error = validate_session()
-
+    print(f"Session:{session}")
     if error:
         send({"name": "Server", "type": "error", "message": error}, room=request.sid)
         return
-    print(123)
+
     if rooms[room]["admin"] != name:
         send(
             {
@@ -109,12 +113,12 @@ def start_game(data):
             room=request.sid,
         )
         return
+    print("pass len")
 
     start_message = data.get("message", "The game has started!")
     genre = data.get("genre", "default")
     rooms[room]["started"] = True
     send_server_message(room, start_message)
-    print(f"Admin {name} started the game with message: {start_message}")
 
     game_model = rooms[room]["game_model"]
     num_players = len(rooms[room]["members"])
@@ -153,7 +157,6 @@ def submit_action(data):
     print(f"{name} submitted action: {action}")
 
     if len(rooms[room]["player_actions"]) == rooms[room]["num_players"]:
-        # Generate the final story and song
         game_model = rooms[room]["game_model"]
         genre = data.get("genre", "default")
         prefix, suffix = game_model.get_suffix_prefix(rooms[room]["background_stories"])
@@ -166,10 +169,8 @@ def submit_action(data):
             prefix,
             suffix,
         )
-        # Todo add sun code here
         suno(song)
         send_server_message(room, final_story)
-        # Optionally send the song to the players or handle it as needed
 
 
 @socketio.on("connect")
@@ -232,7 +233,4 @@ def check_user_activity():
 
 
 if __name__ == "__main__":
-    # thread = threading.Thread(target=check_user_activity)
-    # thread.daemon = True
-    # thread.start()
     socketio.run(app, debug=True)
