@@ -2,6 +2,7 @@ import os
 import google.generativeai as genai
 import random
 import json
+from fix_busted_json import repair_json
 
 # Configure the generative AI
 genai.configure(api_key=os.environ["API_KEY"])
@@ -102,15 +103,28 @@ class Game_Model:
 
         response = self.model.generate_content(prompt)
         return response.text
+    
+    def remove_escape_before_single_quote(self,input_str):
+    # This regex will match any \' inside double quotes and remove the backslash
+        return re.sub(r'(?<=")(.*?)(\\\')(.*?)(?=")', lambda m: m.group(0).replace("\\'", "'"), input_str)
+
 
     def get_json_from_text(self, background_story):
         json_start = background_story.find("{")
         json_end = background_story.rfind("}") + 1
         json_string = background_story[json_start:json_end].strip()
-
-        print(json_string)
-        # Load the JSON into a dictionary
-        background_story_dict = json.loads(json_string)
+        # json_string = self.remove_escape_before_single_quote(json_string)
+        json_string = repair_json(json_string)
+        try:
+            print(repr(json_string))
+            print(json_start, json_end)
+            print(type(json_string))
+            background_story_dict = json.loads(json_string)
+        except json.JSONDecodeError as e:
+            print("Failed to decode JSON:", e)
+            raise
+        
+        print(background_story_dict)
         return background_story_dict
 
     def get_suffix_prefix(self, background_story):

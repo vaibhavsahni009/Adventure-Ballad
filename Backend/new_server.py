@@ -127,7 +127,6 @@ def start_game():
         genre, situation, player_roles, player_names
     )
     background_stories_json = game_model.get_json_from_text(background_stories)
-
     keys = list(background_stories_json.keys())
     new_dict = {}
     for key in keys:
@@ -217,7 +216,7 @@ def submit_action():
         rooms[room]["story"] = final_story
         rooms[room]["song"] = song
         # Call a function to handle the song (e.g., play or save)
-        suno(song)
+        suno(response_dict)
 
         # Send the final story back to all users via WebSocket
         # send_server_message(room, final_story)
