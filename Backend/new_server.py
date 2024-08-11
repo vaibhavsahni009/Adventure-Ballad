@@ -45,7 +45,7 @@ def home():
     code = data.get("code")
     join = data.get("join", False)
     create = data.get("create", False)
-    adventure_type=data.get("adventure_type", False)
+    adventure_type = data.get("adventure_type", False)
     if join:
         print("Join")
 
@@ -67,12 +67,12 @@ def home():
                     "action_prompts": None,
                 },
             },
-            "messages": [],
+            "game_started": False,
             "admin": name,
             "started": False,
             "game_model": Game_Model(),
             "player_reponses": 0,
-            "adventure_type":adventure_type
+            "adventure_type": adventure_type,
         }
     else:
         room = code
@@ -86,8 +86,8 @@ def home():
             "response": None,
         }
     # rooms[room]["members"][name] = time.time()
-    players=list(rooms[room]["members"].keys())
-    return jsonify({"roomCode": room, "user_name": name, "players":players})
+    players = list(rooms[room]["members"].keys())
+    return jsonify({"roomCode": room, "user_name": name, "players": players})
 
 
 @app.route("/start_game", methods=["POST"])
@@ -120,8 +120,9 @@ def start_game():
             ),
             400,
         )
-
+    rooms[room]["game_started"] = True
     genre = rooms[room].get("adventure_type")
+    print(f"Genre {genre}")
     rooms[room]["started"] = True
     game_model = rooms[room]["game_model"]
     num_players = len(rooms[room]["members"])
@@ -143,20 +144,19 @@ def start_game():
         player["role"] = player_roles[i]
         player["action_prompts"] = new_dict.get(player["role"])
 
-    
     rooms[room]["background_story_raw"] = background_stories
-    rooms[room]["background_story_raw"] = new_dict
+    rooms[room]["background_story"] = new_dict
     rooms[room]["situation"] = situation
     rooms[room]["prefix"], rooms[room]["suffix"] = game_model.get_suffix_prefix(
         background_stories
     )
     rooms[room]["num_players"] = num_players
-    print(f"Num players {num_players} {rooms[room]["num_players"]}")
     response_data = {}
     return jsonify(response_data), 200
 
-@app.route("/fetch_players", methods=["POST"])
-def fetch_players():
+
+@app.route("/fetch_player_data", methods=["POST"])
+def fetch_player_data():
     data = request.json
     room = data.get("code")
     name = data.get("name")
@@ -167,27 +167,47 @@ def fetch_players():
     }
     return jsonify(response), 200
 
-@app.route('/api/rooms/<room_code>', methods=['GET'])
+
+@app.route("/api/rooms/<room_code>", methods=["GET"])
 def get_room(room_code):
     # Retrieve room data from the dictionary based on room_code
     room = rooms.get(room_code)
-    
+
     if room is None:
         # Return a 404 error if the room_code is not found
         return jsonify(404, description="Room not found")
-    players=list(room["members"].keys())
-    return jsonify({"players":players})
+    players = list(room["members"].keys())
+    return (
+        jsonify(
+            {
+                "players": players,
+                "admin": room["admin"],
+                "game_started": room["game_started"],
+            }
+        ),
+        200,
+    )
 
-@app.route("/fetch_scenario", methods=["GET"])
-def fetch_scenario():
-    data = request.json
-    room = data.get("code")
-    name = data.get("name")
-    response = {
-        "room": room,
-        "user_name": name,
-        "data": rooms[room]["members"].get(name),
-    }
+
+@app.route("/fetch_scenario/<room>/<name>", methods=["GET"])
+def fetch_scenario(room, name):
+    if rooms[room].get("prefix"):
+        response = {
+            "room": room,
+            "user_name": name,
+            # "data": rooms[room]["members"].get(name),
+            "scenario_published": True,
+            "role": rooms[room]["members"].get(name).get("role"),
+            "text": f"{rooms[room]['prefix']} \n {rooms[room]['members'].get(name).get('action_prompts')} \n {rooms[room]['suffix']} ",
+        }
+        return jsonify(response), 200
+    else:
+        response = {
+            "room": room,
+            "user_name": name,
+            "scenario_published": False,
+            "text": "Please wait Scenario is being genrated",
+        }
     return jsonify(response), 200
 
 
@@ -236,19 +256,12 @@ def submit_action():
             prefix=rooms[room]["prefix"],
             suffix=rooms[room]["suffix"],
         )
-        print()
-        print(response)
         response_dict = game_model.get_json_from_text(response)
         final_story = response_dict.get("story")
         song = response_dict.get("song")
         rooms[room]["story"] = final_story
         rooms[room]["song"] = song
-        # Call a function to handle the song (e.g., play or save)
         suno(response_dict)
-
-        # Send the final story back to all users via WebSocket
-        # send_server_message(room, final_story)
-
         return (
             jsonify({"status": "success", "final_story": final_story, "song": song}),
             200,

@@ -103,11 +103,14 @@ class Game_Model:
 
         response = self.model.generate_content(prompt)
         return response.text
-    
-    def remove_escape_before_single_quote(self,input_str):
-    # This regex will match any \' inside double quotes and remove the backslash
-        return re.sub(r'(?<=")(.*?)(\\\')(.*?)(?=")', lambda m: m.group(0).replace("\\'", "'"), input_str)
 
+    def remove_escape_before_single_quote(self, input_str):
+        # This regex will match any \' inside double quotes and remove the backslash
+        return re.sub(
+            r'(?<=")(.*?)(\\\')(.*?)(?=")',
+            lambda m: m.group(0).replace("\\'", "'"),
+            input_str,
+        )
 
     def get_json_from_text(self, background_story):
         json_start = background_story.find("{")
@@ -123,7 +126,7 @@ class Game_Model:
         except json.JSONDecodeError as e:
             print("Failed to decode JSON:", e)
             raise
-        
+
         print(background_story_dict)
         return background_story_dict
 

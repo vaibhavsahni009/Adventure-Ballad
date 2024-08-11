@@ -3,9 +3,17 @@ import 'common_widgets.dart';
 import 'story_page.dart';
 
 class AdventureScenarioPage extends StatefulWidget {
-  final String role = 'Warrior'; // Example role, this should be dynamic
-  final String narration =
-      'You find yourself in a dark forest. What will you do?'; // Example narration
+  final String role;
+  final String narration;
+  final String roomCode;
+  final String adventurerName;
+
+  AdventureScenarioPage({
+    required this.role,
+    required this.narration,
+    required this.roomCode,
+    required this.adventurerName,
+  });
 
   @override
   _AdventureScenarioPageState createState() => _AdventureScenarioPageState();
@@ -57,6 +65,16 @@ class _AdventureScenarioPageState extends State<AdventureScenarioPage> {
             Text(
               widget.narration,
               style: TextStyle(fontSize: 18),
+            ),
+            SizedBox(height: 20),
+            Text(
+              'Room Code: ${widget.roomCode}',
+              style: TextStyle(fontSize: 16),
+            ),
+            SizedBox(height: 10),
+            Text(
+              'Adventurer Name: ${widget.adventurerName}',
+              style: TextStyle(fontSize: 16),
             ),
             SizedBox(height: 20),
             customTextField(

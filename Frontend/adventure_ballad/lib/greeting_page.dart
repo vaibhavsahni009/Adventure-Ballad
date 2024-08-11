@@ -12,7 +12,9 @@ class GreetingPage extends StatelessWidget {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => AdventureTypePage(adventurerName: adventurerName),
+        builder: (context) => AdventureTypePage(
+          adventurerName: adventurerName,
+        ),
       ),
     );
   }

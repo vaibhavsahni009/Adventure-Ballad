@@ -17,13 +17,10 @@ class AdventureTypePage extends StatelessWidget {
         '', // Replace with your actual endpoint path
         {
           'name': adventurerName,
-          'code': adventureType,
+          'adventure_type': adventureType,
           'create': true,
         },
       );
-
-      print(response);
-      print(jsonDecode(response.body));
 
       if (response.statusCode == 200) {
         // Decode the JSON response

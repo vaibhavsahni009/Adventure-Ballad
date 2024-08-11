@@ -29,7 +29,6 @@ class _JoinRoomPageState extends State<JoinRoomPage> {
             'join': true,
           },
         );
-        print(response);
         if (response.statusCode == 200) {
           // Decode the JSON response
           final responseData = jsonDecode(response.body);

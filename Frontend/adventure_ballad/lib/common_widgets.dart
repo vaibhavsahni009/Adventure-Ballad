@@ -13,13 +13,20 @@ Widget customTextField(
 }
 
 /// A reusable ElevatedButton with full width
-Widget fullWidthButton(
-    {required String text, required VoidCallback onPressed}) {
+// w
+Widget fullWidthButton({
+  required String text,
+  required VoidCallback onPressed,
+  bool isDisabled = false, // Optional parameter to control the button state
+}) {
   return ElevatedButton(
-    onPressed: onPressed,
+    onPressed:
+        isDisabled ? null : onPressed, // Disable button if isDisabled is true
     child: Text(text),
     style: ElevatedButton.styleFrom(
-      minimumSize: Size(double.infinity, 50),
+      minimumSize: Size(double.infinity, 50), // Full width
+      backgroundColor:
+          isDisabled ? Colors.grey : Colors.white, // Change color if disabled
     ),
   );
 }
