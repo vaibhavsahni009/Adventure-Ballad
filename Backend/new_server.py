@@ -211,10 +211,8 @@ def fetch_scenario(room, name):
     return jsonify(response), 200
 
 
-@app.route("/fetch_room_details", methods=["GET"])
-def fetch_room_details():
-    data = request.json
-    room = data.get("code")
+@app.route("/fetch_room_details/<room>", methods=["GET"])
+def fetch_room_details(room):
     new_dict = {}
     for key, value in rooms[room].items():
         if key != "game_model":
@@ -236,6 +234,7 @@ def submit_action():
 
     # Check if all players have submitted their actions
     if rooms[room]["player_reponses"] == rooms[room]["num_players"]:
+        print("now")
         game_model = rooms[room]["game_model"]
         genre = request.json.get("genre", "default")
 
@@ -261,7 +260,10 @@ def submit_action():
         song = response_dict.get("song")
         rooms[room]["story"] = final_story
         rooms[room]["song"] = song
-        suno(response_dict)
+        try:
+            rooms[room]["song"] = suno(response_dict)
+        except:
+            pass
         return (
             jsonify({"status": "success", "final_story": final_story, "song": song}),
             200,
@@ -276,12 +278,14 @@ def submit_action():
     )
 
 
-@app.route("/fetch_final_story", methods=["GET"])
-def fetch_final_story():
-    data = request.json
-    room = data.get("code")
-    name = data.get("name")
+@app.route("/fetch_final_story/<room>", methods=["GET"])
+def fetch_final_story(room):
     return jsonify({"final_story": rooms[room].get("story")}), 200
+
+
+@app.route("/fetch_final_song/<room>", methods=["GET"])
+def fetch_final_song(room):
+    return jsonify({"song": rooms[room].get("song")}), 200
 
 
 if __name__ == "__main__":

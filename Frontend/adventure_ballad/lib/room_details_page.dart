@@ -49,39 +49,42 @@ class _RoomDetailsPageState extends State<RoomDetailsPage> {
     try {
       final response = await requestHandler.getRequest(
         '/api/rooms/$roomCode', // Replace with your actual endpoint path
-        // {'code': roomCode},
       );
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
-        setState(() {
-          players = List<String>.from(responseData['players']);
-          adminName = responseData['admin'];
-          isAdmin = widget.adventurerName == adminName;
+        if (mounted) {
+          setState(() {
+            players = List<String>.from(responseData['players']);
+            adminName = responseData['admin'];
+            isAdmin = widget.adventurerName == adminName;
 
-          // Navigate to LoadingPage if game_started is true
-          if (responseData['game_started'] == true) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => LoadingPage(
-                  roomCode: widget.roomCode,
-                  adventurerName: widget.adventurerName,
+            // Navigate to LoadingPage if game_started is true
+            if (responseData['game_started'] == true) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => LoadingPage(
+                    roomCode: widget.roomCode,
+                    adventurerName: widget.adventurerName,
+                  ),
                 ),
-              ),
-            );
-          }
-        });
+              );
+            }
+          });
+        }
       } else {
         throw Exception('Failed to fetch players');
       }
     } catch (e) {
       // Handle exceptions (e.g., network errors)
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('An error occurred: $e'),
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('An error occurred: $e'),
+          ),
+        );
+      }
     }
   }
 
@@ -110,7 +113,7 @@ class _RoomDetailsPageState extends State<RoomDetailsPage> {
 
             if (response.statusCode == 200) {
               // Check if the response is positive, assuming 'success' key indicates success
-              Navigator.push(
+              Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
                   builder: (context) => LoadingPage(
@@ -123,36 +126,44 @@ class _RoomDetailsPageState extends State<RoomDetailsPage> {
                 _isButtonDisabled = true; // Disable button after clicking
               });
             } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Failed to start the adventure'),
-                ),
-              );
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Failed to start the adventure'),
+                  ),
+                );
+              }
             }
           } catch (e) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('An error occurred: $e'),
-              ),
-            );
-            setState(() {
-              _isButtonDisabled = false; // Re-enable button if error occurs
-            });
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('An error occurred: $e'),
+                ),
+              );
+              setState(() {
+                _isButtonDisabled = false; // Re-enable button if error occurs
+              });
+            }
           }
         }
       } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Only the admin can start the adventure.'),
+            ),
+          );
+        }
+      }
+    } else {
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Only the admin can start the adventure.'),
+            content: Text('You need 2 or more players to start the adventure.'),
           ),
         );
       }
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('You need 2 or more players to start the adventure.'),
-        ),
-      );
     }
   }
 

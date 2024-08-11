@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'common_widgets.dart';
 import 'story_page.dart';
+import 'services/request_handler.dart'; // Make sure this import path is correct
 
 class AdventureScenarioPage extends StatefulWidget {
   final String role;
@@ -21,22 +22,50 @@ class AdventureScenarioPage extends StatefulWidget {
 
 class _AdventureScenarioPageState extends State<AdventureScenarioPage> {
   final TextEditingController _responseController = TextEditingController();
+  final RequestHandler _requestHandler = RequestHandler();
 
-  void _submitResponse() {
+  Future<void> _submitResponse() async {
     final response = _responseController.text;
     if (response.isNotEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Response submitted: $response'),
-        ),
-      );
-      // Navigate to the next page or update the scenario
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => StoryPage(),
-        ),
-      );
+      final body = {
+        'code': widget.roomCode,
+        'name': widget.adventurerName,
+        'action': response,
+      };
+
+      try {
+        final apiResponse = await _requestHandler.postRequest(
+          'submit_action',
+          body,
+        );
+
+        if (apiResponse.statusCode == 200) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Response submitted successfully'),
+            ),
+          );
+          // Navigate to the next page or update the scenario
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => StoryPage(roomCode: widget.roomCode),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to submit response'),
+            ),
+          );
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('An error occurred: $e'),
+          ),
+        );
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -67,15 +96,6 @@ class _AdventureScenarioPageState extends State<AdventureScenarioPage> {
               style: TextStyle(fontSize: 18),
             ),
             SizedBox(height: 20),
-            Text(
-              'Room Code: ${widget.roomCode}',
-              style: TextStyle(fontSize: 16),
-            ),
-            SizedBox(height: 10),
-            Text(
-              'Adventurer Name: ${widget.adventurerName}',
-              style: TextStyle(fontSize: 16),
-            ),
             SizedBox(height: 20),
             customTextField(
                 controller: _responseController, label: 'Enter your response'),
