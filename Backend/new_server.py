@@ -45,6 +45,9 @@ def home():
     code = data.get("code")
     join = data.get("join", False)
     create = data.get("create", False)
+    adventure_type=data.get("adventure_type", False)
+    if join:
+        print("Join")
 
     if not name:
         return jsonify({"error": "Please enter a name."}), 400
@@ -69,10 +72,12 @@ def home():
             "started": False,
             "game_model": Game_Model(),
             "player_reponses": 0,
+            "adventure_type":adventure_type
         }
     else:
         room = code
         if room not in rooms:
+            print("room unavailable")
             return jsonify({"error": "Room does not exist."}), 400
         rooms[room]["members"][name] = {
             "joined_at": time.time(),
@@ -81,7 +86,8 @@ def home():
             "response": None,
         }
     # rooms[room]["members"][name] = time.time()
-    return jsonify({"room": room, "user_name": name})
+    players=list(rooms[room]["members"].keys())
+    return jsonify({"roomCode": room, "user_name": name, "players":players})
 
 
 @app.route("/start_game", methods=["POST"])
@@ -115,7 +121,7 @@ def start_game():
             400,
         )
 
-    genre = data.get("genre", "random")
+    genre = rooms[room].get("adventure_type")
     rooms[room]["started"] = True
     game_model = rooms[room]["game_model"]
     num_players = len(rooms[room]["members"])
@@ -149,6 +155,28 @@ def start_game():
     response_data = {}
     return jsonify(response_data), 200
 
+@app.route("/fetch_players", methods=["POST"])
+def fetch_players():
+    data = request.json
+    room = data.get("code")
+    name = data.get("name")
+    response = {
+        "room": room,
+        "user_name": name,
+        "data": rooms[room]["members"].get(name),
+    }
+    return jsonify(response), 200
+
+@app.route('/api/rooms/<room_code>', methods=['GET'])
+def get_room(room_code):
+    # Retrieve room data from the dictionary based on room_code
+    room = rooms.get(room_code)
+    
+    if room is None:
+        # Return a 404 error if the room_code is not found
+        return jsonify(404, description="Room not found")
+    players=list(room["members"].keys())
+    return jsonify({"players":players})
 
 @app.route("/fetch_scenario", methods=["GET"])
 def fetch_scenario():

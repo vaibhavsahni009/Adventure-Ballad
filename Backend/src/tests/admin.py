@@ -17,9 +17,9 @@ def create_room(name):
     return response.json()
 
 
-def start_game(name, code, genre="random"):
+def start_game(name, code):
     url = BASE_URL + "start_game"
-    data = {"name": name, "code": code, "genre": genre}
+    data = {"name": name, "code": code}
     response = requests.post(url, json=data)
     # return response.json()
 
@@ -75,3 +75,6 @@ if __name__ == "__main__":
 
     submit_action_response = submit_action("admin_user", room_code, action=abc)
     print("Submit Action Response:", submit_action_response)
+
+
+# Todo edit get requests

@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
 import 'common_widgets.dart';
 import 'loading_page.dart';
-import 'join_room_page.dart';
 
 class RoomDetailsPage extends StatelessWidget {
-  final String roomCode = 'ABCD1234'; // Example room code
-  final List<String> players = [
-    'Player1',
-    'Player2',
-    'Player3',
-    'Player4'
-  ]; // Example player list
+  final String adventurerName;
+  final String roomCode;
+  final List<String> players;
+
+  RoomDetailsPage({
+    required this.adventurerName,
+    required this.roomCode,
+    required this.players,
+  });
 
   void _startAdventure(BuildContext context) {
-    if (players.length >= 4) {
+    if (players.length >= 2) {
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -40,6 +41,11 @@ class RoomDetailsPage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            Text(
+              'Welcome, $adventurerName!',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 20),
             Text(
               'Room Code: $roomCode',
               style: TextStyle(fontSize: 18),
