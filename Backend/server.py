@@ -159,7 +159,7 @@ def submit_action(data):
     if len(rooms[room]["player_actions"]) == rooms[room]["num_players"]:
         game_model = rooms[room]["game_model"]
         genre = data.get("genre", "default")
-        prefix, suffix = game_model.get_suffix_prefix(rooms[room]["background_stories"])
+        prefix, suffix = game_model.get_prefix_suffix(rooms[room]["background_stories"])
         final_story, song = game_model.generate_final_story_and_song(
             genre,
             rooms[room]["situation"],

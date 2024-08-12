@@ -147,7 +147,7 @@ def start_game():
     rooms[room]["background_story_raw"] = background_stories
     rooms[room]["background_story"] = new_dict
     rooms[room]["situation"] = situation
-    rooms[room]["prefix"], rooms[room]["suffix"] = game_model.get_suffix_prefix(
+    rooms[room]["prefix"], rooms[room]["suffix"] = game_model.get_prefix_suffix(
         background_stories
     )
     rooms[room]["num_players"] = num_players

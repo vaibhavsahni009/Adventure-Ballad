@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:background_downloader/background_downloader.dart';
-import 'services/request_handler.dart'; // Make sure this import path is correct
+import 'services/request_handler.dart'; // Ensure this import path is correct
 import 'dart:convert';
 
 import 'dart:io';
@@ -21,9 +21,11 @@ class FinalPage extends StatefulWidget {
 class _FinalPageState extends State<FinalPage> {
   final RequestHandler _requestHandler = RequestHandler();
   String _balladSongUrl = '';
+  String _balladSongImageUrl = '';
   bool _isLoading = false;
   bool _isPlaying = false;
   AudioPlayer _audioPlayer = AudioPlayer();
+  bool _isSongFetched = false;
 
   Future<void> _fetchBalladSong() async {
     setState(() {
@@ -39,7 +41,9 @@ class _FinalPageState extends State<FinalPage> {
       if (data['song'] != null && data['song'].isNotEmpty) {
         setState(() {
           _balladSongUrl = data['song']['audio_url'].toString();
+          _balladSongImageUrl = data['song']['image_url'].toString();
           _isLoading = false;
+          _isSongFetched = true;
         });
       }
     } catch (e) {
@@ -120,30 +124,33 @@ class _FinalPageState extends State<FinalPage> {
             SizedBox(height: 30),
             _isLoading
                 ? CircularProgressIndicator()
-                : ElevatedButton(
-                    onPressed: _fetchBalladSong,
-                    child: Text('Fetch Ballad Song'),
-                  ),
-            if (_balladSongUrl.isNotEmpty)
-              Column(
-                children: [
-                  ElevatedButton(
-                    onPressed: _togglePlayPause,
-                    child: Text(_isPlaying ? 'Pause' : 'Play'),
-                  ),
-                  SizedBox(height: 10),
-                  ElevatedButton(
-                    onPressed: _downloadSong,
-                    child: Text('Download Ballad Song'),
-                  ),
-                  SizedBox(height: 10),
-                  Text(
-                    'Song URL: $_balladSongUrl',
-                    style: TextStyle(fontSize: 16),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
+                : !_isSongFetched
+                    ? ElevatedButton(
+                        onPressed: _fetchBalladSong,
+                        child: Text('Fetch Ballad Song'),
+                      )
+                    : Column(
+                        children: [
+                          if (_balladSongImageUrl.isNotEmpty)
+                            Image.network(_balladSongImageUrl),
+                          SizedBox(height: 10),
+                          ElevatedButton(
+                            onPressed: _togglePlayPause,
+                            child: Text(_isPlaying ? 'Pause' : 'Play'),
+                          ),
+                          SizedBox(height: 10),
+                          ElevatedButton(
+                            onPressed: _downloadSong,
+                            child: Text('Download Ballad Song'),
+                          ),
+                          SizedBox(height: 10),
+                          Text(
+                            'Song URL: $_balladSongUrl',
+                            style: TextStyle(fontSize: 16),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
           ],
         ),
       ),

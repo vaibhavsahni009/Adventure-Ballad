@@ -93,9 +93,13 @@ class _AdventureScenarioPageState extends State<AdventureScenarioPage> {
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 20),
-            Text(
-              widget.narration,
-              style: TextStyle(fontSize: 18),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Text(
+                  widget.narration,
+                  style: TextStyle(fontSize: 18),
+                ),
+              ),
             ),
             SizedBox(height: 20),
             SizedBox(height: 20),

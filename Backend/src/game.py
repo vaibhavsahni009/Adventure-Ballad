@@ -130,7 +130,7 @@ class Game_Model:
         print(background_story_dict)
         return background_story_dict
 
-    def get_suffix_prefix(self, background_story):
+    def get_prefix_suffix(self, background_story):
         prefix_narration = ""
         suffix_narration = ""
 
@@ -146,9 +146,7 @@ class Game_Model:
             suffix_narration = background_story_dict.get(
                 "suffix_of_general_narration", ""
             )
-            return suffix_narration, prefix_narration
-            print("Prefix Narration:", prefix_narration)
-            print("Suffix Narration:", suffix_narration)
+            return prefix_narration, suffix_narration,
 
         except json.JSONDecodeError as e:
             print("Failed to decode JSON:", e)
