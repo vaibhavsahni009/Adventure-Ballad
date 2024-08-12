@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:background_downloader/background_downloader.dart';
 import 'services/request_handler.dart'; // Make sure this import path is correct
 import 'dart:convert';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
 
 class FinalPage extends StatefulWidget {
   final String roomCode;
@@ -17,7 +20,7 @@ class _FinalPageState extends State<FinalPage> {
   String _balladSongUrl = '';
   bool _isLoading = false;
   bool _isPlaying = false;
-  final AudioPlayer _audioPlayer = AudioPlayer();
+  AudioPlayer _audioPlayer = AudioPlayer();
 
   Future<void> _fetchBalladSong() async {
     setState(() {
@@ -53,8 +56,34 @@ class _FinalPageState extends State<FinalPage> {
 
     setState(() {
       _isPlaying = !_isPlaying;
-      print(_isPlaying);
     });
+  }
+
+  Future<void> _downloadSong() async {
+    if (_balladSongUrl.isEmpty) return;
+
+    try {
+      // Get the appropriate directory for each platform
+      Directory directory = Directory('.');
+
+      final task = DownloadTask(
+        url: _balladSongUrl,
+        filename: 'ballad_song.mp3',
+        directory: directory.path,
+      );
+
+      await FileDownloader().download(task);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content:
+                Text('Download complete: ${directory.path}/ballad_song.mp3')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Download failed: $e')),
+      );
+    }
   }
 
   @override
@@ -97,6 +126,11 @@ class _FinalPageState extends State<FinalPage> {
                   ElevatedButton(
                     onPressed: _togglePlayPause,
                     child: Text(_isPlaying ? 'Pause' : 'Play'),
+                  ),
+                  SizedBox(height: 10),
+                  ElevatedButton(
+                    onPressed: _downloadSong,
+                    child: Text('Download Ballad Song'),
                   ),
                   SizedBox(height: 10),
                   Text(
