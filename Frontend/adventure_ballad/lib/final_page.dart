@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'services/request_handler.dart'; // Make sure this import path is correct
 import 'dart:convert';
 
@@ -13,8 +14,10 @@ class FinalPage extends StatefulWidget {
 
 class _FinalPageState extends State<FinalPage> {
   final RequestHandler _requestHandler = RequestHandler();
-  String _balladSong = '';
+  String _balladSongUrl = '';
   bool _isLoading = false;
+  bool _isPlaying = false;
+  final AudioPlayer _audioPlayer = AudioPlayer();
 
   Future<void> _fetchBalladSong() async {
     setState(() {
@@ -29,10 +32,9 @@ class _FinalPageState extends State<FinalPage> {
 
       if (data['song'] != null && data['song'].isNotEmpty) {
         setState(() {
-          _balladSong = data['song'];
+          _balladSongUrl = data['song']['audio_url'].toString();
           _isLoading = false;
         });
-        // Here you can add code to play or download the song
       }
     } catch (e) {
       setState(() {
@@ -40,6 +42,25 @@ class _FinalPageState extends State<FinalPage> {
       });
       print('An error occurred: $e');
     }
+  }
+
+  void _togglePlayPause() async {
+    if (_isPlaying) {
+      await _audioPlayer.pause();
+    } else {
+      await _audioPlayer.play(UrlSource(_balladSongUrl));
+    }
+
+    setState(() {
+      _isPlaying = !_isPlaying;
+      print(_isPlaying);
+    });
+  }
+
+  @override
+  void dispose() {
+    _audioPlayer.dispose();
+    super.dispose();
   }
 
   @override
@@ -65,16 +86,25 @@ class _FinalPageState extends State<FinalPage> {
             ),
             SizedBox(height: 30),
             _isLoading
-                ? CircularProgressIndicator() // Show loading indicator while fetching
+                ? CircularProgressIndicator()
                 : ElevatedButton(
                     onPressed: _fetchBalladSong,
-                    child: Text('Play Ballad Song'),
+                    child: Text('Fetch Ballad Song'),
                   ),
-            if (_balladSong.isNotEmpty) // Show song details if available
-              Text(
-                _balladSong,
-                style: TextStyle(fontSize: 16),
-                textAlign: TextAlign.center,
+            if (_balladSongUrl.isNotEmpty)
+              Column(
+                children: [
+                  ElevatedButton(
+                    onPressed: _togglePlayPause,
+                    child: Text(_isPlaying ? 'Pause' : 'Play'),
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    'Song URL: $_balladSongUrl',
+                    style: TextStyle(fontSize: 16),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
           ],
         ),

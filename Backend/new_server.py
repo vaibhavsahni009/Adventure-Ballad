@@ -192,13 +192,22 @@ def get_room(room_code):
 @app.route("/fetch_scenario/<room>/<name>", methods=["GET"])
 def fetch_scenario(room, name):
     if rooms[room].get("prefix"):
+        try:
+        
+            item = rooms[room]["members"].get(name).get("action_prompts").values()
+            user_responsibility = ""
+            for I in item:
+                user_responsibility = f"{user_responsibility} \n {I}"
+        except:
+            user_responsibility = rooms[room]["members"].get(name).get("action_prompts")
+        user_responsibility = f"{rooms[room]['prefix']} \n {user_responsibility} \n {rooms[room]['suffix']}"
         response = {
             "room": room,
             "user_name": name,
             # "data": rooms[room]["members"].get(name),
             "scenario_published": True,
             "role": rooms[room]["members"].get(name).get("role"),
-            "text": f"{rooms[room]['prefix']} \n {rooms[room]['members'].get(name).get('action_prompts')} \n {rooms[room]['suffix']} ",
+            "text": f"{user_responsibility} ",
         }
         return jsonify(response), 200
     else:
@@ -209,7 +218,6 @@ def fetch_scenario(room, name):
             "text": "Please wait Scenario is being genrated",
         }
     return jsonify(response), 200
-
 
 @app.route("/fetch_room_details/<room>", methods=["GET"])
 def fetch_room_details(room):
@@ -261,7 +269,8 @@ def submit_action():
         rooms[room]["story"] = final_story
         rooms[room]["song"] = song
         try:
-            rooms[room]["song"] = suno(response_dict)
+            rooms[room]["song_suno"] = suno(response_dict)
+            print("song", rooms[room]["song_suno"])
         except:
             pass
         return (
@@ -285,7 +294,7 @@ def fetch_final_story(room):
 
 @app.route("/fetch_final_song/<room>", methods=["GET"])
 def fetch_final_song(room):
-    return jsonify({"song": rooms[room].get("song")}), 200
+    return jsonify({"song": rooms[room].get("song_suno")}), 200
 
 
 if __name__ == "__main__":
