@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'adventure_type_page.dart';
 import 'common_widgets.dart';
 import 'join_room_page.dart';
+import 'widgets/app_bar.dart';
 
 class GreetingPage extends StatelessWidget {
   final String adventurerName;
@@ -31,8 +32,9 @@ class GreetingPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Hello, Adventurer!'),
+      appBar: CustomAppBar(
+        titleText: 'Hello Adventurer',
+        // No backgroundColor provided, so it will use the theme's primary color
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'common_widgets.dart';
 import 'greeting_page.dart';
+import 'widgets/app_bar.dart';
 
 class EnterNamePage extends StatefulWidget {
   @override
@@ -31,8 +32,9 @@ class _EnterNamePageState extends State<EnterNamePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Enter Adventurer Name'),
+      appBar: CustomAppBar(
+        titleText: 'Enter Adventurer Name',
+        // No backgroundColor provided, so it will use the theme's primary color
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

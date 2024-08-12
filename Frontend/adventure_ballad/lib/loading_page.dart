@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:adventure_ballad/adventure_scenario_page.dart';
 import 'dart:convert';
 import 'services/request_handler.dart';
+import 'widgets/app_bar.dart';
 
 class LoadingPage extends StatefulWidget {
   final String roomCode;
@@ -82,8 +83,9 @@ class _LoadingPageState extends State<LoadingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Loading'),
+      appBar: CustomAppBar(
+        titleText: 'Loading',
+        // No backgroundColor provided, so it will use the theme's primary color
       ),
       body: Center(
         child: CircularProgressIndicator(),

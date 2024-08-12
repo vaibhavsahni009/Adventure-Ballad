@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'common_widgets.dart';
 import 'story_page.dart';
 import 'services/request_handler.dart'; // Make sure this import path is correct
+import 'widgets/app_bar.dart';
 
 class AdventureScenarioPage extends StatefulWidget {
   final String role;
@@ -78,8 +79,9 @@ class _AdventureScenarioPageState extends State<AdventureScenarioPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Adventure Scenario'),
+      appBar: CustomAppBar(
+        titleText: 'Adventurer Scenario',
+        // No backgroundColor provided, so it will use the theme's primary color
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

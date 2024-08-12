@@ -3,12 +3,20 @@ import 'package:flutter/material.dart';
 /// A reusable TextField with label and border
 Widget customTextField(
     {required TextEditingController controller, required String label}) {
-  return TextField(
-    controller: controller,
-    decoration: InputDecoration(
-      labelText: label,
-      border: OutlineInputBorder(),
-    ),
+  return LayoutBuilder(
+    builder: (context, constraints) {
+      double width = constraints.maxWidth * 0.5; // 50% of the available width
+      return Container(
+        width: width,
+        child: TextField(
+          controller: controller,
+          decoration: InputDecoration(
+            labelText: label,
+            border: OutlineInputBorder(),
+          ),
+        ),
+      );
+    },
   );
 }
 

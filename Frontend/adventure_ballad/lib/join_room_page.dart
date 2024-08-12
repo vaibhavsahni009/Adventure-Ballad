@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'common_widgets.dart';
 import 'room_details_page.dart';
 import 'services/request_handler.dart';
+import 'widgets/app_bar.dart';
 
 class JoinRoomPage extends StatefulWidget {
   final String adventurerName;
@@ -72,8 +73,9 @@ class _JoinRoomPageState extends State<JoinRoomPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Join Room'),
+      appBar: CustomAppBar(
+        titleText: 'Join Room',
+        // No backgroundColor provided, so it will use the theme's primary color
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -82,7 +84,7 @@ class _JoinRoomPageState extends State<JoinRoomPage> {
           children: [
             customTextField(
               controller: _roomCodeController,
-              label: 'Enter Room Code, ${widget.adventurerName}',
+              label: 'Enter Room Code: ${widget.adventurerName}',
             ),
             SizedBox(height: 20),
             fullWidthButton(

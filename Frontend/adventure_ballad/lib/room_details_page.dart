@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'common_widgets.dart';
 import 'loading_page.dart';
 import 'services/request_handler.dart';
+import 'widgets/app_bar.dart';
 
 class RoomDetailsPage extends StatefulWidget {
   final String adventurerName;
@@ -170,8 +171,9 @@ class _RoomDetailsPageState extends State<RoomDetailsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Room Details'),
+      appBar: CustomAppBar(
+        titleText: 'Enter Adventurer Name',
+        // No backgroundColor provided, so it will use the theme's primary color
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -180,21 +182,55 @@ class _RoomDetailsPageState extends State<RoomDetailsPage> {
           children: [
             Text(
               'Welcome, ${widget.adventurerName}!',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 24, // Slightly larger font for the welcome text
+                fontWeight: FontWeight.bold,
+                color: Colors.deepPurple, // Use a deep purple for elegance
+              ),
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 15), // Reduced the gap slightly for better flow
             Text(
               'Room Code: ${widget.roomCode}',
-              style: TextStyle(fontSize: 18),
+              style: TextStyle(
+                fontSize: 18,
+                color: Colors.grey[700], // Softer color for the room code
+              ),
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 15),
             Text(
               'Players in Room:',
-              style: TextStyle(fontSize: 18),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600, // Slightly bold for emphasis
+                color: Colors.grey[800], // A shade darker for visibility
+              ),
             ),
             SizedBox(height: 10),
             Column(
-              children: players.map((player) => Text(player)).toList(),
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: players
+                  .map((player) => Padding(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 5.0), // Add spacing between player names
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.person,
+                                color: Colors.deepPurple,
+                                size: 20), // Use an icon to represent players
+                            SizedBox(width: 8), // Space between icon and text
+                            Text(
+                              player,
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors
+                                    .black87, // Darker color for better readability
+                              ),
+                            ),
+                          ],
+                        ),
+                      ))
+                  .toList(),
             ),
             SizedBox(height: 30),
             fullWidthButton(

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'common_widgets.dart';
 import 'room_details_page.dart';
 import 'services/request_handler.dart';
+import 'widgets/app_bar.dart';
 
 class AdventureTypePage extends StatelessWidget {
   final String adventurerName;
@@ -58,8 +59,9 @@ class AdventureTypePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Choose Your Adventure'),
+      appBar: CustomAppBar(
+        titleText: 'Choose Your Adventurer',
+        // No backgroundColor provided, so it will use the theme's primary color
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

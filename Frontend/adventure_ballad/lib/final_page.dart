@@ -3,8 +3,11 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:background_downloader/background_downloader.dart';
 import 'services/request_handler.dart'; // Make sure this import path is correct
 import 'dart:convert';
+
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
+
+import 'widgets/app_bar.dart';
 
 class FinalPage extends StatefulWidget {
   final String roomCode;
@@ -95,8 +98,9 @@ class _FinalPageState extends State<FinalPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Final Page'),
+      appBar: CustomAppBar(
+        titleText: 'Final Page',
+        // No backgroundColor provided, so it will use the theme's primary color
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
