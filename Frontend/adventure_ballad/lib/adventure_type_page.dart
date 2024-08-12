@@ -66,24 +66,44 @@ class AdventureTypePage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            fullWidthButton(
-              text: 'Pirate',
-              onPressed: () => _selectAdventure(context, 'Pirate'),
+            fullWidthButtonWithImage(
+              text: "Pirate",
+              onPressed: () {
+                _selectAdventure(context, 'Pirate');
+              },
+              imagePath:
+                  'assets/images/pirate.jpeg', // Correct relative path to the image
+              isDisabled: false, // Set to true if the button should be disabled
             ),
             SizedBox(height: 20),
-            fullWidthButton(
-              text: 'Medieval',
-              onPressed: () => _selectAdventure(context, 'Medieval'),
+            fullWidthButtonWithImage(
+              text: "Medieval",
+              onPressed: () {
+                _selectAdventure(context, 'Medieval');
+              },
+              imagePath:
+                  'assets/images/medieval.jpeg', // Correct relative path to the image
+              isDisabled: false, // Set to true if the button should be disabled
             ),
             SizedBox(height: 20),
-            fullWidthButton(
-              text: 'Sci-Fi',
-              onPressed: () => _selectAdventure(context, 'Sci-Fi'),
+            fullWidthButtonWithImage(
+              text: "Sci-Fi",
+              onPressed: () {
+                _selectAdventure(context, 'Sci-Fi');
+              },
+              imagePath:
+                  'assets/images/sci-fi.jpeg', // Correct relative path to the image
+              isDisabled: false, // Set to true if the button should be disabled
             ),
             SizedBox(height: 20),
-            fullWidthButton(
-              text: 'Fantasy',
-              onPressed: () => _selectAdventure(context, 'Fantasy'),
+            fullWidthButtonWithImage(
+              text: "Fantasy",
+              onPressed: () {
+                _selectAdventure(context, 'Fantasy');
+              },
+              imagePath:
+                  'assets/images/fantasy.jpeg', // Correct relative path to the image
+              isDisabled: false, // Set to true if the button should be disabled
             ),
           ],
         ),
